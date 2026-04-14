@@ -18,6 +18,12 @@ export class MyComponent extends HTMLElement {
     this.render();
   }
 
+  /**
+   * The greeting to display
+   * @myCustomTag important
+   */
+  greeting = "Hello, World!";
+
   render() {
     this.shadowRoot.innerHTML = `
       <style>
