@@ -1,5 +1,11 @@
 # @wc-toolkit/jsdoc-tags
 
+## 1.2.0
+
+### Minor Changes
+
+- 08206ac: Added ability to add property-level custom JSDoc tags
+
 ## 1.1.0
 
 ### Minor Changes
