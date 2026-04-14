@@ -76,7 +76,7 @@ export default {
 
 ## Property-level Custom Tags
 
-You can also add custom JSDoc tags to class properties. These will be extracted and included in the Custom Elements Manifest under a `customTags` field for each property.
+You can also add custom JSDoc tags to class properties. These will be extracted and included in the Custom Elements Manifest under the member's field for each property.
 
 ### Example
 
