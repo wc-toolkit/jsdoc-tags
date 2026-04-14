@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { parse } from "comment-parser";
 import { Logger } from "./logger";
 import { deepMerge, type Component } from "@wc-toolkit/cem-utilities";
@@ -77,30 +78,31 @@ export function jsDocTagsPlugin(options: Options = {}) {
  * This function parses the JSDoc tags and adds them to the component metadata in the custom elements manifest.
  * @param params Parameters passed by the analyzer
  * @param tags custom jsdoc tags
- * @returns 
+ * @returns
  */
 export function parseJsDocTags(params: AnalyzePhaseParams, tags: CustomTag) {
   if (params.node.kind !== params.ts.SyntaxKind.ClassDeclaration) {
     return;
   }
 
-  const className = (params.node as unknown as ts.ClassDeclaration).name!.getText();
+  const classNode = params.node as unknown as ts.ClassDeclaration;
+  const className = classNode.name!.getText();
   const component = params.moduleDoc?.declarations?.find(
-    (declaration) => declaration.name === className
+    (declaration) => declaration.name === className,
   ) as Component | undefined;
   const customTags = Object.keys(tags || {});
-  let customComments = "/**";
 
+  // 1. Parse class-level JSDoc tags (existing behavior)
+  let customComments = "/**";
   // @ts-expect-error jsDoc is not a public API
   params.node.jsDoc?.forEach((jsDoc: JSDocTag) => {
     jsDoc?.tags?.forEach(
       (tag: { tagName: { getText: () => string }; comment: string }) => {
         const tagName = tag.tagName.getText();
-
         if (customTags.includes(tagName)) {
           customComments += `\n * @${tagName} ${tag.comment}`;
         }
-      }
+      },
     );
   });
 
@@ -110,7 +112,6 @@ export function parseJsDocTags(params: AnalyzePhaseParams, tags: CustomTag) {
     if (!tagOptions) {
       return;
     }
-
     const propName = tagOptions.mappedName || tagMeta.tag;
     if (!component) {
       return;
@@ -119,10 +120,9 @@ export function parseJsDocTags(params: AnalyzePhaseParams, tags: CustomTag) {
     const cemTag: CEMTag = {
       name: tagMeta.name === "-" ? "" : tagMeta.name,
       default: tagMeta.default,
-      description: tagMeta.description.replace(/^\s?-/, "").trim(), // removes leading dash
+      description: tagMeta.description?.replace(/^\s?-/, "").trim(),
       type: tagMeta.type ? { text: tagMeta.type } : undefined,
     };
-
     if (!existingProp && tagOptions.isArray) {
       component[propName] = [cemTag];
     } else if (Array.isArray(component[propName])) {
@@ -133,4 +133,41 @@ export function parseJsDocTags(params: AnalyzePhaseParams, tags: CustomTag) {
       component[propName] = cemTag;
     }
   });
+
+  // 2. Parse property-level JSDoc tags and inject into CEM
+  if (classNode.members) {
+    classNode.members.forEach((member: any) => {
+      // Only process properties (not methods)
+      if (
+        member.kind === params.ts.SyntaxKind.PropertyDeclaration ||
+        member.kind === params.ts.SyntaxKind.PropertySignature
+      ) {
+        member.jsDoc?.forEach((jsDoc: JSDocTag) => {
+          jsDoc?.tags?.forEach(
+            (tag: { tagName: { getText: () => string }; comment: string }) => {
+              const tagName = tag.tagName.getText();
+              if (customTags.includes(tagName)) {
+                // Find the property in the CEM manifest
+                const propName = member.name?.getText?.() || member.name;
+                if (!component || !propName) return;
+                // Add custom tag data to the property (as a new field, e.g., customTags)
+                let cemProp = component.members?.find?.(
+                  (m: any) => m.name === propName,
+                );
+                if (!cemProp) {
+                  // If not found, create a new property entry
+                  cemProp = { name: propName, kind: "field" };
+                  if (!component.members) {
+                    component.members = [];
+                  }
+                  component.members.push(cemProp);
+                }
+                (cemProp as any)[tagName] = tag.comment;
+              }
+            },
+          );
+        });
+      }
+    });
+  }
 }

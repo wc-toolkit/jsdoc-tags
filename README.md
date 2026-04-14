@@ -74,6 +74,50 @@ export default {
 };
 ```
 
+## Property-level Custom Tags
+
+You can also add custom JSDoc tags to class properties. These will be extracted and included in the Custom Elements Manifest under a `customTags` field for each property.
+
+### Example
+
+```js
+export class MyComponent extends HTMLElement {
+  /**
+   * The greeting to display
+   * @myCustomTag important
+   */
+  greeting = "Hello, World!";
+}
+```
+
+### Configuration
+
+Add your custom property tag to the plugin config:
+
+```js
+jsDocTagsPlugin({
+  tags: {
+    myCustomTag: {
+      description: "A custom property tag",
+      mappedName: "myCustomTag"
+    }
+  }
+})
+```
+
+### Result in custom-elements.json
+
+```json
+{
+  "kind": "field",
+  "name": "greeting",
+  "type": { "text": "string" },
+  "myCustomTag": "important"
+}
+```
+
+This allows you to document and extract custom metadata for properties in a structured way.
+
 ## Result
 
 The data should now be included in the Custom Elements Manifest.
@@ -107,7 +151,10 @@ The data should now be included in the Custom Elements Manifest.
       "name": "button",
       "description": ""
     }
-  ]
+  ],
+  "customTags": {
+    "myCustomTag": "important"
+  }
 }
 ```
 

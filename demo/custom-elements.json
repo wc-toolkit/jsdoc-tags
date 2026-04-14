@@ -12,6 +12,16 @@
           "name": "MyComponent",
           "members": [
             {
+              "kind": "field",
+              "name": "greeting",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"Hello, World!\"",
+              "description": "The greeting to display",
+              "myCustomTag": "important"
+            },
+            {
               "kind": "method",
               "name": "render"
             }

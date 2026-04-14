@@ -19,6 +19,9 @@ export default {
           isArray: true,
           mappedName: "dependencies",
         },
+        myCustomTag: {
+          description: "A custom property tag",
+        }
       },
     }),
   ],
