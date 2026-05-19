@@ -9,11 +9,7 @@ type TagContent = {
 type ExtComponent = Component & {
   dependencies: TagContent[];
   status: TagContent;
-  members: Array<
-    Component["members"][number] & {
-      myCustomTag?: string;
-    }
-  >;
+  members?: NonNullable<Component["members"]>;
 };
 
 describe("cem-inheritance", () => {
@@ -26,7 +22,11 @@ describe("cem-inheritance", () => {
   });
 
   test("should add custom tags to accessors", () => {
-    const headline = component?.members?.find((member) => member.name === "headline");
+    const headline = component?.members?.find(
+      (member) => member.name === "headline",
+    ) as (NonNullable<Component["members"]>[number] & {
+      myCustomTag?: string;
+    }) | undefined;
 
     expect(headline?.myCustomTag).toEqual("accessor-tag");
   });
