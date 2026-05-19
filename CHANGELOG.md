@@ -1,5 +1,11 @@
 # @wc-toolkit/jsdoc-tags
 
+## 1.2.1
+
+### Patch Changes
+
+- 3765173: Fix custom JSDoc tag extraction for getter and setter accessors so mapped tags are included on accessor-backed fields in the generated custom elements manifest.
+
 ## 1.2.0
 
 ### Minor Changes
