@@ -43,6 +43,23 @@ type JSDocTag = {
   }[];
 };
 
+function isSupportedMemberKind(
+  member: { kind: number },
+  syntaxKind: {
+    PropertyDeclaration: number;
+    PropertySignature: number;
+    GetAccessor: number;
+    SetAccessor: number;
+  },
+) {
+  return (
+    member.kind === syntaxKind.PropertyDeclaration ||
+    member.kind === syntaxKind.PropertySignature ||
+    member.kind === syntaxKind.GetAccessor ||
+    member.kind === syntaxKind.SetAccessor
+  );
+}
+
 let userOptions: Options = {
   tags: {},
 };
@@ -137,11 +154,8 @@ export function parseJsDocTags(params: AnalyzePhaseParams, tags: CustomTag) {
   // 2. Parse property-level JSDoc tags and inject into CEM
   if (classNode.members) {
     classNode.members.forEach((member: any) => {
-      // Only process properties (not methods)
-      if (
-        member.kind === params.ts.SyntaxKind.PropertyDeclaration ||
-        member.kind === params.ts.SyntaxKind.PropertySignature
-      ) {
+      // Process field-like members, including accessors that the analyzer emits as fields.
+      if (isSupportedMemberKind(member, params.ts.SyntaxKind)) {
         member.jsDoc?.forEach((jsDoc: JSDocTag) => {
           jsDoc?.tags?.forEach(
             (tag: { tagName: { getText: () => string }; comment: string }) => {

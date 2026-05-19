@@ -22,6 +22,20 @@
               "myCustomTag": "important"
             },
             {
+              "kind": "field",
+              "name": "_headline",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"Hello, Accessors!\""
+            },
+            {
+              "kind": "field",
+              "name": "headline",
+              "description": "The headline to display",
+              "myCustomTag": "accessor-tag"
+            },
+            {
               "kind": "method",
               "name": "render"
             }

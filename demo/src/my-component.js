@@ -24,6 +24,20 @@ export class MyComponent extends HTMLElement {
    */
   greeting = "Hello, World!";
 
+  _headline = "Hello, Accessors!";
+
+  /**
+   * The headline to display
+   * @myCustomTag accessor-tag
+   */
+  get headline() {
+    return this._headline;
+  }
+
+  set headline(value) {
+    this._headline = value;
+  }
+
   render() {
     this.shadowRoot.innerHTML = `
       <style>
